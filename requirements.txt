@@ -5,3 +5,4 @@ scikit-learn>=1.2.0
 python-docx>=0.8.11
 docx2txt>=0.8
 language-tool-python>=2.7.0
+groq
