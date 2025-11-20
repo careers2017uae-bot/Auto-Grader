@@ -36,7 +36,7 @@ st.set_page_config(page_title="RAG Auto-Grader (Local Embeddings)", layout="wide
 # Load embedding model once
 @st.cache_resource(show_spinner=False)
 def load_embedding_model():
-    return SentenceTransformer("llama-3.3-70b-versatile")
+    return SentenceTransformer("all-MiniLM-L6-v2")
 
 embedding_model = load_embedding_model()
 
