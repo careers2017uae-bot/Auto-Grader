@@ -587,6 +587,12 @@ if grade_button:
         st.error("❌ No student submissions provided. Please upload files or paste submissions.")
         st.stop()
     
+    # Initialize session state for results
+    if 'results' not in st.session_state:
+        st.session_state.results = []
+    if 'grading_complete' not in st.session_state:
+        st.session_state.grading_complete = False
+    
     # Grade submissions with progress tracking
     st.session_state.results = []
     progress_bar = st.progress(0, text=f"Grading 0/{len(student_texts)} students...")
@@ -667,17 +673,82 @@ if grade_button:
     time.sleep(0.5)
     progress_bar.empty()
     
-    # Switch to results tab automatically
+    # Set grading complete flag
+    st.session_state.grading_complete = True
+    
+    # Force display of results
     st.success(f"🎉 Successfully graded {len(student_texts)} submissions!")
+    
+    # Use rerun instead of switching tabs automatically
     st.rerun()
 
-# Footer with clear next steps
-st.markdown("---")
-st.markdown(
-    """
-    <div style='text-align: center; color: #666;'>
-    <p>💡 <strong>Pro Tip:</strong> Use custom rubrics for consistent grading across multiple assignments</p>
-    </div>
-    """, 
-    unsafe_allow_html=True
-)
+# Always show results if they exist, regardless of which tab we're on
+if st.session_state.get('results') and len(st.session_state.results) > 0:
+    # Display results in the current tab context
+    st.markdown('<div class="sub-header">🎯 Grading Results</div>', unsafe_allow_html=True)
+    
+    for i, r in enumerate(st.session_state.results):
+        with st.container():
+            # Header with student name and score
+            col1, col2 = st.columns([3, 1])
+            with col1:
+                st.markdown(f"### 👨‍🎓 {r.get('name', 'Student')}")
+            with col2:
+                score = r.get('final_score', 0)
+                score_color = "green" if score >= 80 else "orange" if score >= 60 else "red"
+                st.markdown(f"<h2 style='color: {score_color}; text-align: center;'>{score}/100</h2>", unsafe_allow_html=True)
+            
+            # Progress bar visualization
+            st.markdown('<div class="progress-bar"><div class="progress-fill" style="width: {}%;"></div></div>'.format(score), unsafe_allow_html=True)
+            
+            # Score interpretation
+            if score >= 80:
+                st.markdown('<div class="success-box">🎉 Excellent work! Strong understanding demonstrated.</div>', unsafe_allow_html=True)
+            elif score >= 60:
+                st.markdown('<div class="warning-box">📚 Good effort, with room for improvement in key areas.</div>', unsafe_allow_html=True)
+            else:
+                st.markdown('<div class="warning-box">💡 Needs significant improvement. Review fundamental concepts.</div>', unsafe_allow_html=True)
+            
+            # Detailed feedback in expanders
+            col1, col2 = st.columns(2)
+            
+            with col1:
+                with st.expander("📋 Detailed Feedback", expanded=True):
+                    st.markdown("**Key Observations:**")
+                    st.write(r["reasoning"])
+                    
+                    st.markdown("**Actionable Steps:**")
+                    for line in r["feedback_lines"]:
+                        st.markdown(f'<div class="feedback-item">💡 {line}</div>', unsafe_allow_html=True)
+                    
+                    if r.get("groq_feedback") and enable_ai_feedback:
+                        st.markdown("**🤖 AI Insights:**")
+                        st.write(r["groq_feedback"])
+            
+            with col2:
+                if show_detailed_breakdown:
+                    with st.expander("📊 Score Breakdown", expanded=True):
+                        for item in r["details"].get("breakdown", []):
+                            col_a, col_b, col_c = st.columns([3, 1, 1])
+                            with col_a:
+                                st.write(f"**{item['criterion']}**")
+                            with col_b:
+                                st.write(f"{item['subscore']:.1f}")
+                            with col_c:
+                                progress = item['subscore'] / 100
+                                st.progress(progress)
+                
+                if show_grammar_examples and r["details"].get("grammar", {}).get("available"):
+                    with st.expander("🔍 Grammar Check", expanded=False):
+                        g = r["details"]["grammar"]
+                        st.write(f"**Issues found:** {g['issues_count']}")
+                        for ex in g["examples"]:
+                            st.markdown(f"""
+                            <div class="grammar-issue">
+                                <strong>⚠️ {ex['message']}</strong><br>
+                                <em>Context:</em> ...{ex['context']}...<br>
+                                {f"<em>Suggestions:</em> {', '.join(ex.get('suggestions', []))}" if ex.get('suggestions') else ""}
+                            </div>
+                            """, unsafe_allow_html=True)
+            
+            st.divider()
