@@ -29,7 +29,7 @@ except Exception:
 
 # ==================== HCI ENHANCEMENTS ====================
 st.set_page_config(
-    page_title="AI Essay Grader Pro", 
+    page_title="RAG-Based Intelligent Auto-Grader", 
     layout="wide",
     page_icon="📚",
     initial_sidebar_state="expanded"
@@ -319,7 +319,7 @@ def generate_feedback_with_groq(prompt_text: str) -> Optional[str]:
 # ---------------------------
 # Enhanced Streamlit UI with HCI Principles
 # ---------------------------
-st.markdown('<div class="main-header">📚 AI Essay Grader Pro</div>', unsafe_allow_html=True)
+st.markdown('<div class="main-header">📚 RAG-Based Intelligent Auto-Grader</div>', unsafe_allow_html=True)
 
 # Sidebar with clear information hierarchy
 with st.sidebar:
