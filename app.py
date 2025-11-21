@@ -342,7 +342,9 @@ with st.sidebar:
     # System status
     st.markdown("### 🔍 System Status")
     st.success("✅ Embedding model loaded")
-    st.info(f"📊 Grammar checking: {'✅ Available' if lang_tool else '❌ Not available'}")
+    st.info(f"📊 Grammar checking: {'✅ Available' if lang_tool else  '🔶 Basic checking available'}")
+    # In the sidebar section, replace the grammar checking status line:
+    #st.info(f"📊 Grammar checking: {'✅ Available' if lang_tool else '🔶 Basic checking available'}")
     st.info(f"🤖 AI feedback: {'✅ Available' if os.getenv('GROQ_API_KEY') else '❌ Not configured'}")
     
     # Quick tips
